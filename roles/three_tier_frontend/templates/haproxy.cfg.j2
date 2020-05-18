@@ -12,18 +12,19 @@ defaults
   mode  http
   option  httplog
   option  dontlognull
-        timeout connect 5000
-        timeout client 50000
-        timeout server 50000
+  timeout connect 5000
+  timeout client 50000
+  timeout server 50000
 
 frontend hafrontend
-    bind *:80
-    mode http
-    default_backend app-servers
+  bind *:80
+  mode http
+  default_backend app-servers
 
 backend app-servers
-    mode http
-    balance roundrobin
-    option forwardfor
-    server app1 app1.{{GUID}}.internal:8080 cookie app1 check
-    server app2 app2.{{GUID}}.internal:8080 cookie app2 check
+  mode http
+  balance roundrobin
+  option forwardfor
+{% for appsrv in groups[three_tier_frontend_app_group_name] %}
+  server {{ appsrv }} {{ hostvars[appsrv].ansible_default_ipv4.address }}:8080 cookie {{ appsrv }} check
+{% endfor %}
